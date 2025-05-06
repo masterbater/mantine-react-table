@@ -151,7 +151,9 @@ export const MRT_FilterTextInput = <TData extends MRT_RowData>({
         ? (column.getFilterValue() as [string, string])?.[
             rangeFilterIndex as number
           ] || ''
-        : ((column.getFilterValue() as string) ?? ''),
+        : isDateFilter
+          ? column.getFilterValue() || null
+          : (column.getFilterValue() as string) ?? ''
   );
 
   const [debouncedFilterValue] = useDebouncedValue(
@@ -205,7 +207,7 @@ export const MRT_FilterTextInput = <TData extends MRT_RowData>({
       });
       // This is from Mantine v6 but it also applies for v7
       // https://github.com/mantinedev/mantine/issues/4716#issuecomment-1702699688
-    } else if (isSelectFilter) {
+    } else if (isSelectFilter || isDateFilter) {
       setFilterValue(null);
       column.setFilterValue(null);
     } else {
@@ -355,7 +357,7 @@ export const MRT_FilterTextInput = <TData extends MRT_RowData>({
         popoverProps={{ withinPortal: columnFilterDisplayMode !== 'popover' }}
         {...dateInputProps}
         className={clsx(className, dateInputProps.className)}
-        onChange={(event) => commonProps.onChange(event === null ? '' : event)}
+        onChange={(event) => commonProps.onChange(event === null ? null : event)}
         ref={(node) => {
           if (node) {
             filterInputRefs.current[`${column.id}-${rangeFilterIndex ?? 0}`] =
